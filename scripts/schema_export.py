@@ -22,24 +22,52 @@ from dsgf.versioning import bump_minor, initial_version
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Export Databricks schemas into registry and Git files.")
-    parser.add_argument("--environment", required=True, help="Environment name, such as DEV, UAT, or PROD.")
+    parser.add_argument("--environment", default=None, help="Environment name, such as DEV, UAT, or PROD.")
     parser.add_argument("--config", default="config/environments.example.json", help="Environment config JSON.")
     parser.add_argument("--snapshot-output", default=None, help="Optional local snapshot JSON output.")
-    args = parser.parse_args()
+    args, _unknown = parser.parse_known_args()
 
     if "spark" not in globals():
         raise RuntimeError("schema_export.py must run in Databricks or another Spark environment.")
 
-    config = read_json(args.config)
-    objects = export_environment(spark, config, args.environment)
+    run_config = _resolve_runtime_args(args)
+    config = read_json(run_config["config"])
+    objects = export_environment(spark, config, run_config["environment"])
     write_registry(spark, config, objects)
     export_git_files(config["git_export_root"], objects)
 
-    if args.snapshot_output:
-        write_snapshot(args.snapshot_output, objects, args.environment)
+    if run_config["snapshot_output"]:
+        write_snapshot(run_config["snapshot_output"], objects, run_config["environment"])
 
-    print(f"Exported {len(objects)} objects for {args.environment}")
+    print(f"Exported {len(objects)} objects for {run_config['environment']}")
     return 0
+
+
+def _resolve_runtime_args(args: argparse.Namespace) -> dict[str, str | None]:
+    environment = args.environment or _get_widget_value("environment")
+    config = args.config or _get_widget_value("config") or _get_widget_value("config_path")
+    snapshot_output = args.snapshot_output or _get_widget_value("snapshot_output")
+
+    if not environment:
+        raise ValueError(
+            "Missing environment. Pass --environment DEV or create a Databricks widget named environment."
+        )
+
+    return {
+        "environment": environment,
+        "config": config or "config/environments.example.json",
+        "snapshot_output": snapshot_output,
+    }
+
+
+def _get_widget_value(name: str) -> str | None:
+    if "dbutils" not in globals():
+        return None
+    try:
+        value = dbutils.widgets.get(name)
+    except Exception:
+        return None
+    return value or None
 
 
 def export_environment(spark_session, config: dict, environment: str) -> list[SchemaObject]:
