@@ -83,15 +83,16 @@ def export_environment(spark_session, config: dict, environment: str) -> list[Sc
     objects: list[SchemaObject] = []
 
     for catalog in env_config["catalogs"]:
+        spark_session.sql(f"USE CATALOG `{catalog}`")
         for schema in env_config["schemas"]:
             tables = [
                 (row["tableName"], "TABLE")
-                for row in spark_session.sql(f"SHOW TABLES IN `{catalog}`.`{schema}`").collect()
+                for row in spark_session.sql(f"SHOW TABLES IN `{schema}`").collect()
                 if not bool(row["isTemporary"])
             ]
             views = [
                 (row["viewName"], "VIEW")
-                for row in spark_session.sql(f"SHOW VIEWS IN `{catalog}`.`{schema}`").collect()
+                for row in spark_session.sql(f"SHOW VIEWS IN `{schema}`").collect()
                 if not bool(row["isTemporary"])
             ]
             for object_name, object_type in tables + views:
@@ -163,7 +164,8 @@ def export_git_files(root: str, objects: list[SchemaObject]) -> None:
 
 
 def _show_create(spark_session, catalog: str, schema: str, object_name: str) -> str:
-    qualified = f"`{catalog}`.`{schema}`.`{object_name}`"
+    spark_session.sql(f"USE CATALOG `{catalog}`")
+    qualified = f"`{schema}`.`{object_name}`"
     rows = spark_session.sql(f"SHOW CREATE TABLE {qualified}").collect()
     return rows[0][0]
 
