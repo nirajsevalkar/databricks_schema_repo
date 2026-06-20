@@ -23,7 +23,7 @@ def main() -> int:
     if "spark" not in globals():
         raise RuntimeError("load_master_data.py must run in Databricks or another Spark environment.")
 
-    for csv_path in Path(args.input_dir).glob("*.csv"):
+    for csv_path in _resolve_path(args.input_dir).glob("*.csv"):
         table_name = csv_path.stem
         target = f"`{args.catalog}`.`{args.schema}`.`{table_name}`"
         (
@@ -36,6 +36,11 @@ def main() -> int:
         )
         print(f"Loaded {csv_path} into {target}")
     return 0
+
+
+def _resolve_path(path: str):
+    candidate = Path(path)
+    return candidate if candidate.is_absolute() else ROOT / candidate
 
 
 if __name__ == "__main__":

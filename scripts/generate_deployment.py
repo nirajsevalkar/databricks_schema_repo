@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 try:
     from scripts.bootstrap import add_src_to_path
@@ -23,13 +24,18 @@ def main() -> int:
     args = parser.parse_args()
 
     package_dir = generate_package(
-        source_objects=load_snapshot(args.source),
-        target_objects=load_snapshot(args.target),
+        source_objects=load_snapshot(_resolve_path(args.source)),
+        target_objects=load_snapshot(_resolve_path(args.target)),
         release_id=args.release_id,
-        output_dir=args.output_dir,
+        output_dir=_resolve_path(args.output_dir),
     )
     print(f"Deployment package generated: {package_dir}")
     return 0
+
+
+def _resolve_path(path: str):
+    candidate = Path(path)
+    return candidate if candidate.is_absolute() else ROOT / candidate
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 try:
     from scripts.bootstrap import add_src_to_path
@@ -23,16 +24,21 @@ def main() -> int:
     parser.add_argument("--fail-on-drift", action="store_true", help="Exit with code 2 when drift exists.")
     args = parser.parse_args()
 
-    source = load_snapshot(args.source)
-    target = load_snapshot(args.target)
+    source = load_snapshot(_resolve_path(args.source))
+    target = load_snapshot(_resolve_path(args.target))
     drift = compare_snapshots(source, target)
-    write_json(args.output, {"drift_count": len(drift), "results": [item.to_dict() for item in drift]})
+    write_json(_resolve_path(args.output), {"drift_count": len(drift), "results": [item.to_dict() for item in drift]})
 
     print(f"Drift results written to {args.output}")
     print(f"Drift count: {len(drift)}")
     if drift and args.fail_on_drift:
         return 2
     return 0
+
+
+def _resolve_path(path: str):
+    candidate = Path(path)
+    return candidate if candidate.is_absolute() else ROOT / candidate
 
 
 if __name__ == "__main__":

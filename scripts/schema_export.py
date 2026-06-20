@@ -31,13 +31,13 @@ def main() -> int:
         raise RuntimeError("schema_export.py must run in Databricks or another Spark environment.")
 
     run_config = _resolve_runtime_args(args)
-    config = read_json(run_config["config"])
+    config = read_json(_resolve_path(run_config["config"]))
     objects = export_environment(spark, config, run_config["environment"])
     write_registry(spark, config, objects)
-    export_git_files(config["git_export_root"], objects)
+    export_git_files(_resolve_path(config["git_export_root"]), objects)
 
     if run_config["snapshot_output"]:
-        write_snapshot(run_config["snapshot_output"], objects, run_config["environment"])
+        write_snapshot(_resolve_path(run_config["snapshot_output"]), objects, run_config["environment"])
 
     print(f"Exported {len(objects)} objects for {run_config['environment']}")
     return 0
@@ -68,6 +68,13 @@ def _get_widget_value(name: str) -> str | None:
     except Exception:
         return None
     return value or None
+
+
+def _resolve_path(path: str | None):
+    if path is None:
+        return None
+    candidate = Path(path)
+    return candidate if candidate.is_absolute() else ROOT / candidate
 
 
 def export_environment(spark_session, config: dict, environment: str) -> list[SchemaObject]:
