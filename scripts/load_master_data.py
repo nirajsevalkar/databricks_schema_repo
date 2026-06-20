@@ -1,8 +1,15 @@
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
+
+try:
+    from scripts.bootstrap import add_src_to_path
+except ModuleNotFoundError:
+    from bootstrap import add_src_to_path
+
+
+ROOT = add_src_to_path()
 
 
 def main() -> int:
@@ -33,4 +40,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

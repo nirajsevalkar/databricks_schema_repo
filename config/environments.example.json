@@ -5,16 +5,16 @@
   "master_data_root": "./master_data",
   "environments": {
     "DEV": {
-      "catalogs": ["sample_catalog_dev"],
-      "schemas": ["gold_schema", "reporting_schema"]
+      "catalogs": ["samples"],
+      "schemas": ["accuweather", "bakehouse"]
     },
     "UAT": {
-      "catalogs": ["sample_catalog_uat"],
-      "schemas": ["gold_schema", "reporting_schema"]
+      "catalogs": ["samples"],
+      "schemas": ["accuweather", "bakehouse"]
     },
     "PROD": {
-      "catalogs": ["sample_catalog_prod"],
-      "schemas": ["gold_schema", "reporting_schema"]
+      "catalogs": ["samples"],
+      "schemas": ["accuweather", "bakehouse"]
     }
   },
   "exclude_object_patterns": [

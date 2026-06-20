@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import argparse
-import sys
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+try:
+    from scripts.bootstrap import add_src_to_path
+except ModuleNotFoundError:
+    from bootstrap import add_src_to_path
+
+
+ROOT = add_src_to_path()
 
 from dsgf.deployment import generate_package
 from dsgf.snapshot import load_snapshot
@@ -31,4 +34,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

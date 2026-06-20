@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import argparse
 import re
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+try:
+    from scripts.bootstrap import add_src_to_path
+except ModuleNotFoundError:
+    from bootstrap import add_src_to_path
+
+
+ROOT = add_src_to_path()
 
 from dsgf.hashing import ddl_hash
 from dsgf.io import read_json, safe_object_path, write_json
