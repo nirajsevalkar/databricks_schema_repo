@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True
+
 
 def add_src_to_path() -> Path:
     """Add repository src directory to sys.path for local and Databricks runs."""
@@ -15,4 +17,3 @@ def add_src_to_path() -> Path:
     if str(src_path) not in sys.path:
         sys.path.insert(0, str(src_path))
     return root
-

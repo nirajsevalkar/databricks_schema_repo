@@ -20,7 +20,8 @@ def main() -> int:
     parser.add_argument("--source", default=None, help="Source snapshot JSON.")
     parser.add_argument("--target", default=None, help="Target snapshot JSON.")
     parser.add_argument("--release-id", default=None, help="Release folder name.")
-    parser.add_argument("--output-dir", default="deployments", help="Deployment output directory.")
+    parser.add_argument("--output-dir", default=None, help="Deployment output directory.")
+    parser.add_argument("--snapshot-root", default=None, help="Folder containing dev_snapshot.json and uat_snapshot.json.")
     args, _unknown = parser.parse_known_args()
 
     run_config = _resolve_runtime_args(args)
@@ -35,10 +36,11 @@ def main() -> int:
 
 
 def _resolve_runtime_args(args: argparse.Namespace) -> dict[str, str]:
-    source = args.source or _get_widget_value("source")
-    target = args.target or _get_widget_value("target")
-    release_id = args.release_id or _get_widget_value("release_id")
-    output_dir = args.output_dir or _get_widget_value("output_dir") or "deployments"
+    snapshot_root = args.snapshot_root or _get_widget_value("snapshot_root") or _default_snapshot_root()
+    source = args.source or _get_widget_value("source") or f"{snapshot_root}/dev_snapshot.json"
+    target = args.target or _get_widget_value("target") or f"{snapshot_root}/uat_snapshot.json"
+    release_id = args.release_id or _get_widget_value("release_id") or "Release_Manual"
+    output_dir = args.output_dir or _get_widget_value("output_dir") or f"{snapshot_root}/deployments"
 
     missing = []
     if not source:
@@ -67,6 +69,13 @@ def _get_widget_value(name: str) -> str | None:
     except Exception:
         return None
     return value or None
+
+
+def _default_snapshot_root() -> str:
+    local_examples = ROOT / "examples" / "snapshots"
+    if local_examples.exists():
+        return str(local_examples)
+    return "/Workspace/Shared/databricks_schema_governance/output"
 
 
 def _resolve_path(path: str):
