@@ -1,0 +1,87 @@
+bundle:
+  name: databricks_schema_governance
+
+variables:
+  cluster_id:
+    description: Existing all-purpose or job cluster ID used to run the governance scripts.
+  snapshot_root:
+    description: Workspace or volume folder where schema snapshots and drift reports are written.
+    default: /Workspace/Shared/databricks_schema_governance/output
+  config_path:
+    description: Path to the environment config file after bundle deployment.
+    default: ${workspace.file_path}/config/environments.example.json
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://YOUR-WORKSPACE-URL
+
+  prod:
+    mode: production
+    workspace:
+      host: https://YOUR-WORKSPACE-URL
+
+resources:
+  jobs:
+    schema_governance_export:
+      name: DSGF - Schema Export
+      tasks:
+        - task_key: export_dev_schema
+          existing_cluster_id: ${var.cluster_id}
+          spark_python_task:
+            python_file: ${workspace.file_path}/scripts/schema_export.py
+            parameters:
+              - --environment
+              - DEV
+              - --config
+              - ${var.config_path}
+              - --snapshot-output
+              - ${var.snapshot_root}/dev_snapshot.json
+
+        - task_key: export_uat_schema
+          existing_cluster_id: ${var.cluster_id}
+          spark_python_task:
+            python_file: ${workspace.file_path}/scripts/schema_export.py
+            parameters:
+              - --environment
+              - UAT
+              - --config
+              - ${var.config_path}
+              - --snapshot-output
+              - ${var.snapshot_root}/uat_snapshot.json
+
+        - task_key: detect_dev_uat_drift
+          depends_on:
+            - task_key: export_dev_schema
+            - task_key: export_uat_schema
+          existing_cluster_id: ${var.cluster_id}
+          spark_python_task:
+            python_file: ${workspace.file_path}/scripts/detect_drift.py
+            parameters:
+              - --source
+              - ${var.snapshot_root}/dev_snapshot.json
+              - --target
+              - ${var.snapshot_root}/uat_snapshot.json
+              - --output
+              - ${var.snapshot_root}/dev_uat_drift_report.json
+              - --fail-on-drift
+
+    schema_governance_release_package:
+      name: DSGF - Generate Release Package
+      tasks:
+        - task_key: generate_release_package
+          existing_cluster_id: ${var.cluster_id}
+          spark_python_task:
+            python_file: ${workspace.file_path}/scripts/generate_deployment.py
+            parameters:
+              - --source
+              - ${var.snapshot_root}/dev_snapshot.json
+              - --target
+              - ${var.snapshot_root}/uat_snapshot.json
+              - --release-id
+              - Release_${bundle.target}
+              - --output-dir
+              - ${var.snapshot_root}/deployments
+
