@@ -1,0 +1,24 @@
+{
+  "metadata_catalog": "platform_metadata",
+  "metadata_schema": "default",
+  "git_export_root": "./schema",
+  "master_data_root": "./master_data",
+  "environments": {
+    "DEV": {
+      "catalogs": ["sample_catalog_dev"],
+      "schemas": ["gold_schema", "reporting_schema"]
+    },
+    "UAT": {
+      "catalogs": ["sample_catalog_uat"],
+      "schemas": ["gold_schema", "reporting_schema"]
+    },
+    "PROD": {
+      "catalogs": ["sample_catalog_prod"],
+      "schemas": ["gold_schema", "reporting_schema"]
+    }
+  },
+  "exclude_object_patterns": [
+    "^tmp_",
+    "^stg_"
+  ]
+}

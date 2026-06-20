@@ -1,0 +1,22 @@
+{
+  "changes": [
+    {
+      "qualified_name": "sample_catalog.reporting_schema.reporting_entity_details",
+      "source_hash": "6755dec7c861649579152a0f85979a8d9fb7b112450b07d2f8d11e031af80994",
+      "source_version": "1.1.0",
+      "status": "MISSING_IN_TARGET",
+      "target_hash": null,
+      "target_version": null
+    },
+    {
+      "qualified_name": "sample_catalog.gold_schema.entity_details",
+      "source_hash": "73642ba27801440145f970ffa2fc3035774dd6d786f81ea0ace7c46920b90027",
+      "source_version": "1.1.0",
+      "status": "HASH_MISMATCH",
+      "target_hash": "a1372ba66199c8ae1a8967e364d1f6a4b031808dce523ee693510cb57e5e9dec",
+      "target_version": "1.0.0"
+    }
+  ],
+  "generated_on": "2026-06-20T16:07:19.119824+00:00",
+  "release_id": "Release_2026_06_20"
+}

@@ -1,0 +1,16 @@
+{
+  "environment": "UAT",
+  "extracted_on": "2026-06-20T00:00:00+00:00",
+  "objects": [
+    {
+      "object_name": "entity_details",
+      "object_type": "TABLE",
+      "catalog_name": "sample_catalog",
+      "schema_name": "gold_schema",
+      "schema_hash": "a1372ba66199c8ae1a8967e364d1f6a4b031808dce523ee693510cb57e5e9dec",
+      "schema_version": "1.0.0",
+      "ddl_definition": "CREATE TABLE sample_catalog.gold_schema.entity_details (entity_id STRING) USING DELTA;",
+      "environment": "UAT"
+    }
+  ]
+}
